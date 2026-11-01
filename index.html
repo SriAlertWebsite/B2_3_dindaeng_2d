@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="th">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+/* Modern, academic cartographic UI */
+:root{--navy:#193657;--teal:#087c88;--text:#203b55;--muted:#62768a;--border:#e0e8f0}
+*{box-sizing:border-box}html,body{font-family:Tahoma,'Noto Sans Thai',Arial,sans-serif!important;color:var(--text)}
+.map-title{position:fixed;left:18px;top:18px;z-index:750;background:#fff;border:1px solid var(--border);border-radius:9px;box-shadow:0 5px 26px #1d38572a;max-width:min(570px,calc(100vw - 480px));padding:17px 21px}
+.map-title strong{font-size:20px;color:var(--navy);line-height:1.5;display:block}
+.map-mini-legend{position:fixed;bottom:22px;left:18px;z-index:760;background:white;border:1px solid #e9edf2;border-radius:8px;padding:11px 14px;box-shadow:0 5px 18px #19365022;display:flex;align-items:center;flex-wrap:wrap;gap:11px;font-size:13px}
+.color-chip{display:inline-block;height:13px;width:13px;border:1px solid #556a7b;vertical-align:middle;margin-right:5px;border-radius:2px}
+.height-sidebar{position:fixed;right:0;top:0;bottom:0;width:390px;background:#fff;border-left:1px solid var(--border);box-shadow:-6px 0 23px #11283d18;z-index:900;transition:transform .27s ease;display:flex;flex-direction:column}
+.height-sidebar.is-closed{transform:translateX(100%)}
+.height-sidebar__body{height:100%;overflow-y:auto;padding:27px 25px 35px}
+.height-side-head{display:flex;justify-content:space-between;align-items:start;gap:10px}.height-side-head h2{font-size:23px;line-height:1.4;color:var(--navy);margin:0}.height-close{background:#fff;border:1px solid #dee7ee;border-radius:8px;color:var(--navy);cursor:pointer;width:32px;height:32px;font-size:21px;flex:none}.height-accent{width:50px;height:3px;background:var(--teal);margin:15px 0 20px;border-radius:3px}
+.height-card{background:#f5f8fb;border:1px solid #e7edf2;border-radius:10px;padding:19px 17px;margin-bottom:18px}.height-card h3{font-size:16px;line-height:1.4;margin:0 0 16px;color:var(--navy)}
+.height-category{display:flex;gap:13px;align-items:start;margin:15px 0;line-height:1.7;font-size:15px}.height-category b{font-weight:700;display:block;color:#263f57}.height-category .color-chip{height:20px;width:20px;min-width:20px;margin-top:4px}
+.height-hint{font-size:14px;line-height:1.8;color:#62748a;margin:13px 0 0}
+.height-foot{font-size:13px;color:#6b7f92;line-height:1.8;border-top:1px solid var(--border);padding-top:18px}
+.height-toggle{position:fixed;top:50%;right:390px;transform:translateY(-50%);z-index:960;background:var(--navy);color:white;border:none;border-radius:8px 0 0 8px;cursor:pointer;width:36px;height:66px;font-size:22px;transition:right .27s ease;box-shadow:-2px 3px 10px #122c4640}.height-toggle.is-closed{right:0}
+.leaflet-control-layers{max-width:min(310px,calc(100vw - 65px));max-height:48vh;overflow-y:auto;border:1px solid #e1e8ef!important;border-radius:8px!important;box-shadow:0 4px 15px #1f385822!important}.leaflet-control-layers-expanded{font-size:14px!important}.leaflet-top.leaflet-left{top:105px;left:9px}
+.leaflet-popup-content-wrapper{border:1px solid #dce5ee!important;border-radius:0!important;box-shadow:0 13px 37px #18354a4d!important;overflow:hidden!important;padding:0!important}.leaflet-popup-content{width:355px!important;max-width:calc(100vw - 60px)!important;margin:0!important}.leaflet-popup-content table{border-collapse:collapse;width:100%;font-size:13px}.leaflet-popup-content th,.leaflet-popup-content td{border:1px solid #dce5ee!important;padding:9px 12px!important;color:#1d3650!important;text-align:left;overflow-wrap:anywhere}.leaflet-popup-content th{background:#eff4f8!important;width:43%;font-weight:700}.height-popup-heading{background:var(--navy);color:white;font-size:17px;font-weight:bold;padding:16px 45px 16px 17px}.leaflet-popup-close-button{color:#fff!important;top:12px!important;right:13px!important;font-size:24px!important;z-index:5000!important}
+@media(max-width:750px){.height-sidebar{width:min(90vw,390px)}.height-toggle{right:min(90vw,390px)}.map-title{top:10px;left:10px;max-width:calc(100vw - 40px);padding:12px 14px}.map-title strong{font-size:15px}.map-mini-legend{bottom:14px;left:10px;font-size:11px;max-width:calc(100vw - 25px)}.leaflet-top.leaflet-left{top:115px;left:7px}}
+
+        </style>
+        <title>แผนที่แสดงการกระจายตัวของความสูงอาคารในพื้นที่เขตดินแดง</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        <script src="data/DinDaengDistrict_1.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[13.747642608094404,100.51971738454016],[13.796547076667492,100.60838063769985]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/qgis2web/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // modify popup if contains media
+        function addClassToPopupIfMedia(content, popup) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var imgTd = tempDiv.querySelector('td img');
+            if (imgTd) {
+                var src = imgTd.getAttribute('src');
+                if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
+                    popup._contentNode.classList.add('media');
+                    var img = popup._contentNode.querySelector('td img');
+                    if (img) {
+                        // If already loaded (cache), update immediately
+                        if (img.complete && img.naturalHeight > 0) {
+                            popup.update();
+                        } else {
+                            img.addEventListener('load', function() {
+                                popup.update();
+                            });
+                            img.addEventListener('error', function() {
+                                popup.update();
+                            });
+                        }
+                    }
+                } else if (/\.(mp3|wav|ogg|aac)$/i.test(src)) {
+                    var audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = src;
+                    imgTd.parentNode.replaceChild(audio, imgTd);
+                    popup._contentNode.classList.add('media');
+                    setTimeout(function() {
+                        popup.setContent(tempDiv.innerHTML);
+                        popup.update();
+                    }, 10);
+                } else if (/\.(mp4|webm|ogg|mov)$/i.test(src)) {
+                    var video = document.createElement('video');
+                    video.controls = true;
+                    video.src = src;
+                    video.style.width = "400px";
+                    video.style.height = "300px";
+                    video.style.maxHeight = "60vh";
+                    video.style.maxWidth = "60vw";
+                    imgTd.parentNode.replaceChild(video, imgTd);
+                    popup._contentNode.classList.add('media');
+                    // Aggiorna il popup quando il video carica i metadati
+                    video.addEventListener('loadedmetadata', function() {
+                        popup.update();
+                    });
+                    setTimeout(function() {
+                        popup.setContent(tempDiv.innerHTML);
+                        popup.update();
+                    }, 10);
+                } else {
+                    popup._contentNode.classList.remove('media');
+                }
+            } else {
+                popup._contentNode.classList.remove('media');
+            }
+        }
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_OpenStreetMap2_0');
+        map.getPane('pane_OpenStreetMap2_0').style.zIndex = 400;
+        var layer_OpenStreetMap2_0 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OpenStreetMap2_0',
+            opacity: 1.0,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 18
+        });
+        layer_OpenStreetMap2_0;
+        map.addLayer(layer_OpenStreetMap2_0);
+        function pop_DinDaengDistrict_1(feature, layer) {
+            var p = feature.properties || {};
+            function esc(v) { return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+            var title = p.BL_NAME || p.BLDG_ID || p.OBJECTID || 'ข้อมูลอาคาร';
+            var labels = {OBJECTID:'OBJECTID',BLDG_ID:'รหัสอาคาร',BL_HEIGHT:'ความสูงอาคาร (m)',BL_DEPTH:'ความลึกอาคาร',BL_NSTOREY:'จำนวนชั้น',BL_UNIT_F:'หน่วย',BL_AREA:'พื้นที่อาคาร',BL_AREA_FL:'พื้นที่ใช้สอย',BL_MATL:'วัสดุอาคาร',BL_NAME:'ชื่ออาคาร',BL_SUBNAME:'ชื่อรอง',BL_VILLAGE:'หมู่บ้าน',BL_ROAD:'ถนน',BL_SOI:'ซอย',BL_SUB_DIS:'แขวง',BL_DISTRIC:'เขต',BL_CHANGWA:'จังหวัด',BL_POSTCOD:'รหัสไปรษณีย์',UPDATE_YEA:'ปีปรับปรุง',BL_REMARK:'หมายเหตุ',TUMB_CODE:'รหัสแขวง',AMPH_CODE:'รหัสเขต',PROV_CODE:'รหัสจังหวัด',Shape_Leng:'Shape_Leng',Shape_Area:'Shape_Area',Cal_HEIGHT:'ความสูงอาคารที่คำนวณ (m)'};
+            var rows = Object.keys(labels).filter(function(k){return p[k] !== null && p[k] !== undefined && p[k] !== '';}).map(function(k){return '<tr><th>'+labels[k]+'</th><td>'+esc(p[k])+'</td></tr>';}).join('');
+            layer.bindPopup('<div class="height-popup-heading">'+esc(title)+'</div><table>'+rows+'</table>', {maxHeight:420,maxWidth:390,closeButton:true});
+        }
+
+        function style_DinDaengDistrict_1_0(feature) {
+            if (feature.properties['Cal_HEIGHT'] >= 0.000000 && feature.properties['Cal_HEIGHT'] <= 15.000000 ) {
+                return {
+                pane: 'pane_DinDaengDistrict_1',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(43,131,186,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Cal_HEIGHT'] >= 15.000000 && feature.properties['Cal_HEIGHT'] <= 30.000000 ) {
+                return {
+                pane: 'pane_DinDaengDistrict_1',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(171,221,164,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Cal_HEIGHT'] >= 30.000000 && feature.properties['Cal_HEIGHT'] <= 60.000000 ) {
+                return {
+                pane: 'pane_DinDaengDistrict_1',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,238,47,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Cal_HEIGHT'] >= 60.000000 && feature.properties['Cal_HEIGHT'] <= 100.000000 ) {
+                return {
+                pane: 'pane_DinDaengDistrict_1',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,174,97,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Cal_HEIGHT'] >= 100.000000 && feature.properties['Cal_HEIGHT'] <= 154.000000 ) {
+                return {
+                pane: 'pane_DinDaengDistrict_1',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_DinDaengDistrict_1');
+        map.getPane('pane_DinDaengDistrict_1').style.zIndex = 401;
+        map.getPane('pane_DinDaengDistrict_1').style['mix-blend-mode'] = 'normal';
+        var layer_DinDaengDistrict_1 = new L.geoJson(json_DinDaengDistrict_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_DinDaengDistrict_1',
+            layerName: 'layer_DinDaengDistrict_1',
+            pane: 'pane_DinDaengDistrict_1',
+            onEachFeature: pop_DinDaengDistrict_1,
+            style: style_DinDaengDistrict_1_0,
+        });
+        bounds_group.addLayer(layer_DinDaengDistrict_1);
+        map.addLayer(layer_DinDaengDistrict_1);
+        var overlaysTree = [
+            {label: 'ดินแดง — ความสูงอาคาร<br /><table><tr><td><span class="legend-color-chip" style="display:inline-block;width:15px;height:15px;background:#2b83ba;border:1px solid #8492a1;vertical-align:middle"></span></td><td>0–15 ม.</td></tr><tr><td><span class="legend-color-chip" style="display:inline-block;width:15px;height:15px;background:#abdda4;border:1px solid #8492a1;vertical-align:middle"></span></td><td>15–30 ม.</td></tr><tr><td><span class="legend-color-chip" style="display:inline-block;width:15px;height:15px;background:#ffee2f;border:1px solid #8492a1;vertical-align:middle"></span></td><td>30–60 ม.</td></tr><tr><td><span class="legend-color-chip" style="display:inline-block;width:15px;height:15px;background:#fdae61;border:1px solid #8492a1;vertical-align:middle"></span></td><td>60–100 ม.</td></tr><tr><td><span class="legend-color-chip" style="display:inline-block;width:15px;height:15px;background:#d7191c;border:1px solid #8492a1;vertical-align:middle"></span></td><td>100 ม.ขึ้นไป</td></tr></table>', layer: layer_DinDaengDistrict_1},
+            {label: "OpenStreetMap2", layer: layer_OpenStreetMap2_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            position: 'topleft',
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true, 
+        });
+        lay.addTo(map);
+        setBounds();
+        </script>        
+    <div class="map-title"><strong>แผนที่แสดงการกระจายตัวของความสูงอาคารในพื้นที่เขตดินแดง</strong></div>
+<div class="map-mini-legend" aria-label="คำอธิบายช่วงความสูงอาคาร">
+ <span><i class="color-chip" style="background:#2b83ba"></i>0–15 ม.</span>
+ <span><i class="color-chip" style="background:#abdda4"></i>15–30 ม.</span>
+ <span><i class="color-chip" style="background:#ffed30"></i>30–60 ม.</span>
+ <span><i class="color-chip" style="background:#fdae61"></i>60–100 ม.</span>
+ <span><i class="color-chip" style="background:#d7191c"></i>100 ม.ขึ้นไป</span>
+</div>
+<button id="heightToggle" class="height-toggle" type="button" aria-expanded="true" aria-controls="heightSidebar" aria-label="ปิดแถบรายละเอียด">›</button>
+<aside class="height-sidebar" id="heightSidebar" aria-label="รายละเอียดแผนที่สำรวจ">
+ <div class="height-sidebar__body">
+  <div class="height-side-head"><h2>รายละเอียดแผนที่สำรวจ</h2><button id="heightClose" class="height-close" type="button" aria-label="ปิดแถบรายละเอียด">×</button></div><div class="height-accent"></div>
+  <div class="height-card"><h3>การกระจายตัวของความสูงอาคาร</h3>
+   <div class="height-category"><span class="color-chip" style="background:#2b83ba"></span><div><b>สีฟ้า</b>ความสูงอาคาร 0 ถึง 15 เมตร</div></div>
+   <div class="height-category"><span class="color-chip" style="background:#abdda4"></span><div><b>สีเขียว</b>ความสูงอาคาร 15 ถึง 30 เมตร</div></div>
+   <div class="height-category"><span class="color-chip" style="background:#ffed30"></span><div><b>สีเหลือง</b>ความสูงอาคาร 30 ถึง 60 เมตร</div></div>
+   <div class="height-category"><span class="color-chip" style="background:#fdae61"></span><div><b>สีส้ม</b>ความสูงอาคาร 60 ถึง 100 เมตร</div></div>
+   <div class="height-category"><span class="color-chip" style="background:#d7191c"></span><div><b>สีแดง</b>ความสูงอาคาร 100 เมตร ขึ้นไป</div></div>
+  </div>
+  <div class="height-card"><h3>วิธีใช้งานแผนที่</h3><p class="height-hint">คลิกพื้นที่อาคารเพื่อดูรายละเอียดอาคารในรูปแบบตาราง และกด × เพื่อปิดหน้าต่างข้อมูล</p><p class="height-hint">กดปุ่มเลือกเลเยอร์ใต้ปุ่มซูมทางด้านซ้าย เพื่อเปิดรายการชั้นข้อมูล จากนั้นกดช่องทำเครื่องหมายเพื่อเปิด–ปิดชั้นข้อมูลอาคาร</p></div>
+  <div class="height-foot">ได้รับการสนับสนุนจาก สกสว. · ข้อมูลแผนที่ © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a></div>
+ </div>
+</aside>
+<script>
+(function(){
+ var panel=document.getElementById('heightSidebar'),toggle=document.getElementById('heightToggle'),close=document.getElementById('heightClose');
+ function setOpen(open){panel.classList.toggle('is-closed',!open);toggle.classList.toggle('is-closed',!open);toggle.textContent=open?'›':'‹';toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'ปิดแถบรายละเอียด':'เปิดแถบรายละเอียด');}
+ toggle.addEventListener('click',function(){setOpen(panel.classList.contains('is-closed'));});
+ close.addEventListener('click',function(){setOpen(false);});
+})();
+</script>
+
+</body>
+</html>
